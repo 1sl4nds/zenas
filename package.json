@@ -1,0 +1,27 @@
+{
+  "name": "@zenas/zenas",
+  "version": "0.0.0",
+  "description": "A Platform for Computational Law",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1sl4nds/zenas.git"
+  },
+  "author": "1sl4nds",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/1sl4nds/zenas/issues"
+  },
+  "homepage": "https://github.com/1sl4nds/zenas#readme",
+  "workspaces": [
+    "internal/react",
+    "internal/react-ui",
+    "internal/client"
+  ]
+}

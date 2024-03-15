@@ -1,0 +1,208 @@
+version: '3.9'
+
+services:
+  data-prepper:
+    image: opensearchproject/data-prepper:2.6.1
+    volumes:
+      - /data/service-map/
+      - ./config/data-prepper/pipelines.yml:/usr/share/data-prepper/pipelines/pipelines.yml
+      - ./config/data-prepper/data-prepper-config.yml:/usr/share/data-prepper/config/data-prepper-config.yml
+    ports:
+      - "21890:21890"
+      - "21891:21891"
+      - "21892:21892"
+    expose:
+      - "21890"
+      - "21891"
+      - "21892"
+    depends_on:
+      opensearch-dashboards:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:latest
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    environment:
+      - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
+    volumes:
+      - ./config/grafana/:/etc/grafana/
+    ports:
+      - "3000:3000"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN_PASSWORD=change_me 
+      - KC_DB=postgres
+      - KC_DB_PASSWORD=postgress
+      - KC_DB_USERNAME=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres-keycloak:5432/postgres
+    command: ["start-dev", "--features=token-exchange"]
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
+
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio-data:/data
+    environment:
+      - "MINIO_ROOT_USER=ROOTNAME" 
+      - "MINIO_ROOT_PASSWORD=CHANGEME123" 
+    command:
+      [
+        "server", 
+        "/data", 
+        "--console-address",
+        ":9001"
+      ]
+
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
+      - "discovery.type=single-node"
+      - "plugins.query.datasources.encryption.masterkey=9822d070432c0549633c2432"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    ports:
+      - "5601:5601"
+    expose:
+      - "5601"
+    environment:
+      - 'OPENSEARCH_HOSTS=["http://opensearch:9200"]'
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
+    depends_on:
+      opensearch:
+        condition: service_started
+
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector-contrib:0.94.0
+    deploy:
+      resources:
+        limits:
+          memory: 125M
+    restart: unless-stopped
+    command:
+      [
+        "--config=/etc/opentelemetry-collector-config.yml",
+        "--config=/etc/opentelemetry-collector-config-extras.yml"
+      ]
+    volumes:
+      - ./config/opentelemetry-collector/:/etc/
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      data-prepper:
+        condition: service_started
+      jaeger:
+        condition: service_started
+    environment:
+      ENVOY_PORT: 4317
+
+  postgres-keycloak:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgress
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-keycloak-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U postgres
+
+  postgres-server:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgress
+      - POSTGRES_DB=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-zenas-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U postgres
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus-config.yaml
+      - --enable-feature=exemplar-storage
+      - --enable-feature=otlp-write-receiver
+      - --storage.tsdb.retention.time=1h
+      - --storage.tsdb.path=/prometheus
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.enable-lifecycle
+      - --web.route-prefix=/
+    volumes:
+      - ./config/prometheus/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+
+  server:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile.server
+    ports:
+      - "8000:8000"
+    depends_on:
+      keycloak:
+        condition: service_started
+      minio:
+        condition: service_started
+      opentelemetry-collector:
+        condition: service_started
+      postgres-server:
+        condition: service_healthy
+
+volumes:
+  minio-data:
+  opensearch-data:
+  postgres-keycloak-data:
+  postgres-zenas-data:

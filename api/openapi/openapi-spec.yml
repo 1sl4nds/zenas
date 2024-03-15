@@ -1,0 +1,563 @@
+openapi: 3.0.0
+info:
+  title: Zenas
+  description: A Platform for Computational Law.
+  version: "0.0.0"
+paths:
+  /action:
+    get:
+      summary: Retrieves existing actions.
+      responses:
+        "200":
+          description: Actions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetActionResponse"
+    post:
+      summary: Creates a new action.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateActionRequest'
+      responses:
+        "200":
+          description: Action created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateActionResponse"
+  /annotation:
+    get:
+      summary: Retrieves existing annotations.
+      responses:
+        "200":
+          description: Actions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAnnotationResponse"
+    post:
+      summary: Creates a new annotation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnnotationRequest'
+      responses:
+        "200":
+          description: Action created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateActionResponse"
+  /litigation:
+    get:
+      summary: Retrieves existing litigations.
+      responses:
+        "200":
+          description: Litigations retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetLitigationResponse"
+    post:
+      summary: Creates a new litigation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLitigationRequest'
+      responses:
+        "200":
+          description: Litigation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateLitigationResponse"
+  /comment:
+    get:
+      summary: Retrieves existing comments.
+      responses:
+        "200":
+          description: Comments retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+    post:
+      summary: Creates a new comment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        "200":
+          description: Document created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+  /completion:
+    get:
+      summary: Retrieves existing completions.
+      responses:
+        "200":
+          description: Completions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+    post:
+      summary: Creates a new completion.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompletionRequest'
+      responses:
+        "200":
+          description: Completion created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+  /document:
+    get:
+      summary: Retrieves existing documents.
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+            description: Unique identifier for the document to be retrieved.
+      responses:
+        "200":
+          description: Documents retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDocumentResponse'
+        "400":
+          description: Bad request. This could be due to an invalid id.
+        "401":
+          description: Unauthorized. Access token is missing or invalid.
+    post:
+      summary: Creates a new document.
+      description: >-
+        Accepts a base64-encoded document or a document URL. The API supports a wide range of file types
+        as supported by Apache Tika, including but not limited to PDF, DOCX, PPTX, XLSX, TXT, JPEG, PNG,
+        MP3, and MP4. For a comprehensive list of supported file types, please refer to the Apache Tika documentation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDocumentRequest'
+      responses:
+        "200":
+          description: Document created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+        "400":
+          description: Bad request. This can happen due to unsupported file types or incorrect encoding.
+        "401":
+          description: Unauthorized. Access token is missing or invalid.
+        "415":
+          description: Unsupported Media Type. The file type provided is not supported.
+  /entity:
+    get:
+      summary: Retrieves existing entities.
+      responses:
+        "200":
+          description: Entity retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateEntityResponse"
+    post:
+      summary: Creates a new entity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntityRequest'
+      responses:
+        "200":
+          description: Entity created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+  /event:
+    get:
+      summary: Retrieves existing events.
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+            description: Unique identifier for the event to be retrieved.
+      responses:
+        "200":
+          description: Events retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventResponse'
+        "400":
+          description: Bad request. This could be due to an invalid id.
+        "401":
+          description: Unauthorized. Access token is missing or invalid.
+    post:
+      summary: Publishes a new event.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        "200":
+          description: Event published successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateEventResponse"
+  /message:
+    get:
+      summary: Retrieves existing messages.
+      responses:
+        "200":
+          description: Messages received successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMessageResponse"
+    post:
+      summary: Creates a new message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageRequest'
+      responses:
+        "200":
+          description: Message created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDocumentResponse"
+  /person:
+    get:
+      summary: Retrieves existing persons.
+      responses:
+        "200":
+          description: Persons retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPersonResponse"
+    post:
+      summary: Creates a new person.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonRequest'
+      responses:
+        "200":
+          description: Person created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePersonResponse"
+  /search:
+    get:
+      summary: Retrieves results for a query.
+      responses:
+        "200":
+          description: Search results retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetSearchResponse"
+  /task:
+    get:
+      summary: Retrieves existing tasks.
+      responses:
+        "200":
+          description: Tasks retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTaskResponse"
+    post:
+      summary: Creates a new task.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        "200":
+          description: Task created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateTaskResponse"
+components:
+  schemas:
+    CreateActionRequest:
+      type: object
+      properties:
+        document:
+          type: string
+          description: Base64-encoded document or document URL. Supports a wide range of file types as per Apache Tika.
+    CreateActionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateAnnotationRequest:
+      type: object
+      properties:
+        document:
+          type: string
+          description: Base64-encoded document or document URL. Supports a wide range of file types as per Apache Tika.
+    CreateAnnotationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateLitigationRequest:
+      type: object
+      properties:
+        document:
+          type: string
+          description: Base64-encoded document or document URL. Supports a wide range of file types as per Apache Tika.
+    CreateLitigationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateCommentRequest:
+      type: object
+      properties:
+        document:
+          type: string
+          description: Base64-encoded document or document URL. Supports a wide range of file types as per Apache Tika.
+    CreateCommentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateCompletionRequest:
+      type: object
+      properties:
+        document:
+          type: string
+          description: Base64-encoded document or document URL. Supports a wide range of file types as per Apache Tika.
+    CreateCompletionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateDocumentRequest:
+      type: object
+      properties:
+        document:
+          type: string
+          description: Base64-encoded document or document URL. Supports a wide range of file types as per Apache Tika.
+    CreateDocumentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateEventRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    CreateEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateEntityRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    CreateEntityResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreateMessageRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    CreateMessageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreatePlaceRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    CreatePlaceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    CreatePersonRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    CreatePersonResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the person.
+    CreateTaskRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    CreateTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the task.
+    GetActionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the action.
+    GetAnnotationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the annotation.
+    GetLitigationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+    GetCommentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the document.
+        title:
+          type: string
+          description: The title of the document.
+        downloadUrl:
+          type: string
+          description: URL to download the original document.
+        classification:
+          type: string
+          description: The classification of the document, if available.
+        size:
+          type: integer
+          description: The size of the document in bytes.
+        createdAt:
+          type: string
+          format: date-time
+          description: The creation date of the document.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The last update date of the document.
+    GetDocumentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        downloadUrl:
+          type: string
+        classification:
+          type: string
+        size:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    GetEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    GetMessageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    GetPersonResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    GetSearchResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    GetTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.computationallawframework.com/oauth/authorize
+          tokenUrl: https://api.computationallawframework.com/oauth/token
+          scopes:
+            read: Allows read access
+            write: Allows write access

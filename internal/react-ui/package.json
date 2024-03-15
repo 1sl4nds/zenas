@@ -1,0 +1,25 @@
+{
+  "name": "@zenas/react-ui",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "1sl4nds",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/1sl4nds/zenas/issues"
+  },
+  "homepage": "https://github.com/1sl4nds/zenas#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-typescript": "^7.23.3",
+    "@tsconfig/recommended": "^1.0.3",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "typescript": "^5.3.3"
+  }
+}

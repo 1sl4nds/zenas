@@ -1,0 +1,24 @@
+FROM golang:alpine AS build
+
+WORKDIR /go/bin/src/server
+
+COPY . .
+
+RUN apk update && apk add --no-cache git ca-certificates && update-ca-certificates
+RUN go get -d -v ./...
+
+RUN adduser -D -g '' serveruser
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/server ./cmd
+
+FROM scratch
+
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /go/bin/server /go/bin/server
+
+EXPOSE "8000"
+
+USER serveruser
+
+ENTRYPOINT ["/go/bin/server"]
